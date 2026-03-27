@@ -1,0 +1,7 @@
+[dotenv@17.3.1] injecting env (3) from ..\.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.3.1] injecting env (0) from ..\.env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.3.1] injecting env (0) from ..\.env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+LabX Server running on port 3005
+Client connected: zqW96Z7Zp39FJvsCAAAC
+Query received bounds: hi
+Client disconnected: zqW96Z7Zp39FJvsCAAAC
