@@ -95,7 +95,12 @@ function App() {
               <h1 className="font-semibold tracking-wide text-base md:text-xl text-white text-neon">LabX AI Assistant</h1>
             </div>
             <div className="flex items-center gap-4">
-              {(!isConnected || errorStatus) && (
+              {isConnected ? (
+                <div className="flex items-center gap-1.5 md:gap-2 text-emerald-400 text-[10px] md:text-sm bg-emerald-950/20 px-2 md:px-3 py-1 rounded-full border border-emerald-500/20">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <span className="opacity-80">Online</span>
+                </div>
+              ) : (
                 <div className="flex items-center gap-2 text-red-400 text-xs md:text-sm bg-red-950/30 px-2 md:px-3 py-1 rounded-full border border-red-500/20">
                   <WifiOff size={14} />
                   <span className="hidden sm:inline">{errorStatus || "Disconnected"}</span>
