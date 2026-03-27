@@ -8,7 +8,10 @@ export const useSocket = () => {
 
   useEffect(() => {
     // Connect to the backend
-    const serverUrl = `http://${window.location.hostname}:3005`;
+    // IMPORTANT: For Android APK testing, window.location.hostname will be "localhost" (the phone itself).
+    // We must point to the computer's IP address instead.
+    const COMPUTER_IP = "192.168.31.79";
+    const serverUrl = window.location.hostname === 'localhost' ? `http://${COMPUTER_IP}:3005` : `http://${window.location.hostname}:3005`;
     socketRef.current = io(serverUrl);
 
     socketRef.current.on('connect', () => {
