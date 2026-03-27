@@ -21,38 +21,36 @@ function App() {
 
   const { isConnected, errorStatus, sendQuery, bindEvents } = useSocket();
   
-  useEffect(() => {
-    // Bind all socket events to state updates
-    bindEvents({
-      onQueryAcknowledged: (data) => {
-        setStatus(prev => ({ ...prev, needsSearch: data.needsSearch, sources: [] }));
-      },
-      onSources: (sourcesData) => {
-        setStatus(prev => ({ ...prev, sources: sourcesData }));
-        setMessages(prev => prev.map(msg => 
-          msg.id === activeAnswerId ? { ...msg, sources: sourcesData } : msg
-        ));
-      },
-      onAnswerChunk: (chunkText) => {
-        setMessages(prev => prev.map(msg => {
-          if (msg.id === activeAnswerId) {
-            return { ...msg, content: msg.content + chunkText };
-          }
-          return msg;
-        }));
-      },
-      onAnswerDone: () => {
-        setStatus(prev => ({ ...prev, isProcessing: false }));
-        setMessages(prev => prev.map(msg => msg.id === activeAnswerId ? { ...msg, isStreaming: false } : msg));
-        setActiveAnswerId(null);
-      },
-      onError: (errorMsg) => {
-        setStatus(prev => ({ ...prev, isProcessing: false }));
-        setMessages(prev => prev.map(msg => msg.id === activeAnswerId ? { ...msg, isStreaming: false, content: msg.content + `\n\n⚠️ **System Error:** ${errorMsg}` } : msg));
-        setActiveAnswerId(null);
-      }
-    });
-  }, [bindEvents, activeAnswerId]);
+  // Handlers for the streaming response
+  const getHandlers = (answerId) => ({
+    onQueryAcknowledged: (data) => {
+      setStatus(prev => ({ ...prev, needsSearch: data.needsSearch, sources: [] }));
+    },
+    onSources: (sourcesData) => {
+      setStatus(prev => ({ ...prev, sources: sourcesData }));
+      setMessages(prev => prev.map(msg => 
+        msg.id === answerId ? { ...msg, sources: sourcesData } : msg
+      ));
+    },
+    onAnswerChunk: (chunkText) => {
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === answerId) {
+          return { ...msg, content: msg.content + chunkText };
+        }
+        return msg;
+      }));
+    },
+    onAnswerDone: () => {
+      setStatus(prev => ({ ...prev, isProcessing: false }));
+      setMessages(prev => prev.map(msg => msg.id === answerId ? { ...msg, isStreaming: false } : msg));
+      setActiveAnswerId(null);
+    },
+    onError: (errorMsg) => {
+      setStatus(prev => ({ ...prev, isProcessing: false }));
+      setMessages(prev => prev.map(msg => msg.id === answerId ? { ...msg, isStreaming: false, content: msg.content + `\n\n⚠️ **System Error:** ${errorMsg}` } : msg));
+      setActiveAnswerId(null);
+    }
+  });
 
   const handleSend = (query) => {
     // 1. Add user message
@@ -72,8 +70,8 @@ function App() {
       sources: []
     });
     
-    // 4. Send via socket
-    sendQuery(query);
+    // 4. Send via edge function hook
+    sendQuery(query, getHandlers(answerId));
   };
 
   return (

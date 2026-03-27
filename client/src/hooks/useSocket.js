@@ -1,66 +1,84 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { io } from 'socket.io-client';
+import { useState, useCallback } from 'react';
 
+/**
+ * useSocket (Ported to Supabase Edge Function / SSE)
+ * Replaces the original Socket.io hook with a streaming fetch implementation.
+ * Maintains the same API to minimize changes to App.jsx.
+ */
 export const useSocket = () => {
-  const socketRef = useRef(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true); // Always true for HTTP-based edge functions
   const [errorStatus, setErrorStatus] = useState(null);
 
-  useEffect(() => {
-    // Connect to the backend
-    // IMPORTANT: For Android APK testing, window.location.hostname will be "localhost" (the phone itself).
-    // We must point to the computer's IP address instead.
-    const COMPUTER_IP = "192.168.31.79";
-    const serverUrl = window.location.hostname === 'localhost' ? `http://${COMPUTER_IP}:3005` : `http://${window.location.hostname}:3005`;
-    socketRef.current = io(serverUrl);
+  // Supabase Project Specific URL
+  const SUPABASE_FUNC_URL = "https://stskaknjtybtabmsfbtr.supabase.co/functions/v1/labx-query";
 
-    socketRef.current.on('connect', () => {
-      setIsConnected(true);
-      setErrorStatus(null);
-    });
+  const sendQuery = useCallback(async (query, handlers) => {
+    try {
+      const response = await fetch(SUPABASE_FUNC_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Note: Standard Supabase functions don't strictly require an anon key if not using RLS, 
+          // but if enabled, you would add 'apikey': '...' here.
+        },
+        body: JSON.stringify({ query }),
+      });
 
-    socketRef.current.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socketRef.current.on('connect_error', (err) => {
-      setErrorStatus("Cannot connect to server.");
-      setIsConnected(false);
-    });
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+      if (!response.ok) {
+        throw new Error(`Server Error: ${response.statusText}`);
       }
-    };
-  }, []);
 
-  /**
-   * Subscribes to backend events to update streaming UI
-   */
-  const bindEvents = useCallback((handlers) => {
-    if (!socketRef.current) return;
-    
-    // Clear previous event listeners to avoid duplicates
-    socketRef.current.off('query_acknowledged');
-    socketRef.current.off('sources');
-    socketRef.current.off('answer_chunk');
-    socketRef.current.off('answer_done');
-    socketRef.current.off('error');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-    // Register new ones provided from App
-    socketRef.current.on('query_acknowledged', handlers.onQueryAcknowledged);
-    socketRef.current.on('sources', handlers.onSources);
-    socketRef.current.on('answer_chunk', handlers.onAnswerChunk);
-    socketRef.current.on('answer_done', handlers.onAnswerDone);
-    socketRef.current.on('error', handlers.onError);
-  }, []);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-  const sendQuery = useCallback((query) => {
-    if (socketRef.current) {
-      socketRef.current.emit('send_query', { query });
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // Keep the last incomplete line
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const event = JSON.parse(line.slice(6));
+              
+              switch (event.type) {
+                case 'status':
+                  handlers.onQueryAcknowledged(event.data);
+                  break;
+                case 'sources':
+                  handlers.onSources(event.data);
+                  break;
+                case 'chunk':
+                  handlers.onAnswerChunk(event.data);
+                  break;
+                case 'done':
+                  handlers.onAnswerDone();
+                  break;
+                default:
+                  break;
+              }
+            } catch (e) {
+              console.error("Failed to parse SSE line:", line, e);
+            }
+          }
+        }
+      }
+
+    } catch (err) {
+      console.error("Edge Function Fetch Error:", err);
+      setErrorStatus("Failed to reach AI service.");
+      handlers.onError("Communication error with LabX service.");
+      handlers.onAnswerDone();
     }
   }, []);
+
+  // bindEvents is no longer needed for Socket.io listeners, 
+  // so we keep it as a no-op to avoid breaking App.jsx.
+  const bindEvents = useCallback(() => {}, []);
 
   return { isConnected, errorStatus, sendQuery, bindEvents };
 };
