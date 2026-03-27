@@ -9,8 +9,9 @@ export const useSocket = () => {
   const [isConnected, setIsConnected] = useState(true); // Always true for HTTP-based edge functions
   const [errorStatus, setErrorStatus] = useState(null);
 
-  // Supabase Project Specific URL
+  // Supabase Configuration
   const SUPABASE_FUNC_URL = "https://stskaknjtybtabmsfbtr.supabase.co/functions/v1/labx-query";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0c2tha25qdHlidGFibXNmYnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MjIzNjAsImV4cCI6MjA5MDE5ODM2MH0.jxV2fnF6eOtCSczCfq2TxRUsZF6OBO7_Oj2tMD45mx8";
 
   const sendQuery = useCallback(async (query, handlers) => {
     try {
@@ -18,8 +19,8 @@ export const useSocket = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Note: Standard Supabase functions don't strictly require an anon key if not using RLS, 
-          // but if enabled, you would add 'apikey': '...' here.
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({ query }),
       });
