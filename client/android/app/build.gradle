@@ -1,10 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
+<<<<<<< HEAD:client/android/app/build.gradle
     namespace = "com.labxai.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.labxai.app"
+=======
+    namespace = "co.labx.ai"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "co.labx.ai"
+>>>>>>> 182643d (feat: Migrate to Supabase Edge Functions with Capacitor & GitHub Actions APK build):frontend/android/app/build.gradle
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

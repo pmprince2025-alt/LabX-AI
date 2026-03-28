@@ -1,0 +1,18 @@
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+C:\Users\user\Desktop\,,,,\node_modules\groq-sdk\client.js:60
+            throw new Errors.GroqError("The GROQ_API_KEY environment variable is missing or empty; either provide it, or instantiate the Groq client with an apiKey option, like new Groq({ apiKey: 'My API Key' }).");
+            ^
+
+GroqError: The GROQ_API_KEY environment variable is missing or empty; either provide it, or instantiate the Groq client with an apiKey option, like new Groq({ apiKey: 'My API Key' }).
+    at new Groq (C:\Users\user\Desktop\,,,,\node_modules\groq-sdk\client.js:60:19)
+    at new module.exports (C:\Users\user\Desktop\,,,,\node_modules\groq-sdk\index.js:4:10)
+    at Object.<anonymous> (C:\Users\user\Desktop\,,,,\index.js:141:14)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+
+Node.js v24.13.0
