@@ -1,14 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-<<<<<<< HEAD:client/android/app/src/main/res/values/strings.xml
-    <string name="app_name">LabX-AI</string>
-    <string name="title_activity_main">LabX-AI</string>
-    <string name="package_name">com.labxai.app</string>
-    <string name="custom_url_scheme">com.labxai.app</string>
-=======
     <string name="app_name">LabX</string>
     <string name="title_activity_main">LabX</string>
     <string name="package_name">co.labx.ai</string>
     <string name="custom_url_scheme">co.labx.ai</string>
->>>>>>> 182643d (feat: Migrate to Supabase Edge Functions with Capacitor & GitHub Actions APK build):frontend/android/app/src/main/res/values/strings.xml
 </resources>
